@@ -13,16 +13,7 @@ const {
 const isDev = require("electron-is-dev");
 const si = require("systeminformation");
 const { autoUpdater } = require("electron-updater");
-si.baseboard()
-	.then((data) => {
-		const motherboardId = data.serial;
-		console.log("Motherboard ID:", motherboardId);
-		// Send the motherboard ID to the renderer process
-		mainWindow.webContents.send("motherboardId", motherboardId);
-	})
-	.catch((error) => {
-		console.error("Error retrieving motherboard information:", error);
-	});
+let motherboardId = null;
 function createMainWindow() {
 	// Create the browser window.
 	const { width, height } = screen.getPrimaryDisplay().workAreaSize;
@@ -34,7 +25,7 @@ function createMainWindow() {
 		webPreferences: {
 			contextIsolation: false,
 			nodeIntegration: true,
-			preload: path.join(__dirname, "../preload.js"),
+			// preload: path.join(__dirname, "../preload.js"),
 		},
 		icon: path.join(__dirname, "../src/assets/logo.png"),
 	});
@@ -52,7 +43,18 @@ function createMainWindow() {
 	win.loadURL(
 		isDev ? "http://localhost:5173" : `file://${__dirname}/../build/index.html`
 	);
+
+	si.uuid()
+		.then((data) => {
+			motherboardId = data;
+			win.webContents.send("motherboardId", motherboardId);
+			console.log("Motherboard ID in Electron:", motherboardId);
+		})
+		.catch((error) => {
+			console.error("Error retrieving motherboard information:", error);
+		});
 }
+
 contextMenu({
 	showLearnSpelling: false,
 	showLookUpSelection: false,
@@ -66,7 +68,7 @@ contextMenu({
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
 	createMainWindow();
-	app.setLocale("en-US");
+	// app.setLocale("en-US");
 	autoUpdater.checkForUpdates();
 });
 
@@ -81,6 +83,9 @@ ipcMain.on("open-pdf", (event, filePath) => {
 		},
 	});
 	win.loadURL(filePath);
+});
+ipcMain.on("getMotherboardId", (event) => {
+	event.reply("motherboardId", motherboardId);
 });
 autoUpdater.on("update-downloaded", (_event, releaseNote, releaseName) => {
 	const dialogObj = {
