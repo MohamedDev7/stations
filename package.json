@@ -6,7 +6,7 @@
 	"version": "1.0.0",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/MohamedDev7/YPC-HR-COUPONS.git"
+		"url": "git@github.com:MohamedDev7/stations.git"
 	},
 	"scripts": {
 		"dev": "vite",
@@ -45,8 +45,8 @@
 	},
 	"build": {
 		"extends": null,
-		"appId": "com.example.financial-fund",
-		"productName": "financial fund",
+		"appId": "com.example.ypc_stations",
+		"productName": "ypc stations",
 		"icon": "./../src/assets/logo.png",
 		"files": [
 			"build/**/*",
